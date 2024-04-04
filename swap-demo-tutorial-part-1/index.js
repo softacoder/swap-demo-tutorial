@@ -87,10 +87,14 @@ const params = {
 
 const response = await fetch(`https://api.0x.org/swap/v1/price?${qs.stringify(params)}`);
 swapPriceJSON = await response.json();
-console.log
+console.log("Price: ", swapPriceJSON.price);
+
+document.getElementById("from_amount").value = swapPriceJSON.buyAmount / 10 ** currentTrade.to.decimals;
+document.getElementById("gas_amount").innerHTML = swapPriceJSON.estimatedGas;
+
 }
 
-// start 45 minutes
+// start 50 minutes .
 
 init();
 
