@@ -94,7 +94,44 @@ document.getElementById("gas_amount").innerHTML = swapPriceJSON.estimatedGas;
 
 }
 
-// start 50 minutes .
+async function getQuote(account){
+  console.log("Getting Quote");
+
+  if (!currentTrade.from || !currentTrade.to || !document.getElementById("from_amount").value) return;
+  let amount = Number(document.getElementById("from_amount").value * 10 ** currentTrade.from.decimals);
+
+const params = {
+  sellToken: currentTrade.from.address,
+  buyToken: currentTrade.to.address,
+  sellAmount: amount,
+  takerAddress: account,
+}
+
+const response = await fetch(`https://api.0x.org/swap/v1/quote?${qs.stringify(params)}`);
+swapQuoteJSON = await response.json();
+console.log("Price: ", swapQuoteJSON.price);
+
+document.getElementById("from_amount").value = swapPriceJSON.buyAmount / 10 ** currentTrade.to.decimals;
+document.getElementById("gas_amount").innerHTML = swapPriceJSON.estimatedGas;
+
+return swapQuoteJSON;
+
+}
+
+async function trySwap(){
+  let accounts = await ethereum.request({method: "eth_accounts"});
+  let takerAddress = accounts[0];
+
+  console.log("takerAddress: ", takerAddress);
+
+  const swapQuoteJSON = await getQuote(takerAddress);
+
+  const web3 = new Web3(Web3.givenProvider);
+
+  const ERC20TokenContract = new web3.eth.Contract(jsonInterface, address);
+
+  // start at 1h
+}
 
 init();
 
