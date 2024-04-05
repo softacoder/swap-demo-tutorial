@@ -1,5 +1,10 @@
+const { default: BigNumber} = require('bignumber.js');
+const qs = require('qs');
+const Web3 = require('web3');
+
 let currentTrade = {};
 let currentSelectSide;
+let tokens;
 
 async function init() {
   await listAvailableTokens();
@@ -127,10 +132,24 @@ async function trySwap(){
   const swapQuoteJSON = await getQuote(takerAddress);
 
   const web3 = new Web3(Web3.givenProvider);
+  const fromTokenAddress = currentTrade.from.address;
+  const erc20abi= [{ "inputs": [ { "internalType": "string", "name": "name", "type": "string"}]}]
+  const ERC20TokenContract = new web3.eth.Contract(erc20abi, fromTokenAddress);
 
-  const ERC20TokenContract = new web3.eth.Contract(jsonInterface, address);
+  console.log("setup ERC20TokenContract:", ERC20TokenContract);
 
-  // start at 1h
+  const maxApproval = new BigNumber(2).pow(256).minus(1);
+  ERC20TokenContract.methods.approve(
+    swapQuoteJSON.allowanceTarget,
+    maxApproval,
+  )
+.send({from: takerAddress})
+.then(tx => {
+  console.log("tx: ", tx)
+});
+
+const receipt = await web3.eth.sendTransaction(swapQuoteJSON);
+console.log("receipt: ", receipt);
 }
 
 init();
@@ -139,5 +158,9 @@ document.getElementById("login_button").onclick = connect;
 document.getElementById("from_token_select").onclick = () => {
   openModal("from");
 };
+document.getElementById("to_token_select").onclick = () => {
+    openModal("to");
+};
 document.getElementById("modal_close").onclick = closeModal();
 document.getElementById("from_amount").onblur = getPrice(); 
+document.getElementById("swap_button").onclick = trySwap();
