@@ -164,3 +164,5 @@ document.getElementById("to_token_select").onclick = () => {
 document.getElementById("modal_close").onclick = closeModal();
 document.getElementById("from_amount").onblur = getPrice(); 
 document.getElementById("swap_button").onclick = trySwap();
+
+// 
